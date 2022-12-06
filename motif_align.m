@@ -1,7 +1,7 @@
 function real = motif_align(aseq,mot_pos,r)
 
-mot = mot_pos.data(r).mot;% read the selected motif
-pos = mot_pos.data(r).pos;% read the positions of this motif
+mot = mot_pos.mot(r).mot;% read the selected motif
+pos = mot_pos.mot(r).pos;% read the positions of this motif
 
 size_pos = size(pos);% Check how many motifs on the oligo
 len_pos = size_pos(2);

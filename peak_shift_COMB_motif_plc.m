@@ -1,22 +1,23 @@
-function [shift_all,shift_dyad,m1] = peak_shift_COMB_motif_plc(seq,mpos,mot_up,mot_down,dyad_f,score_all_pos,ind,bd,c_limit,linker)
-%linker = 14;
+function [shift_all,shift_dyad,m1] = peak_shift_COMB_motif_plc(seq,mpos,mot_up,mot_down,dyad_f,score_all_pos,bd,c_limit,linker,bkg_nuc_number)
+%% this function optimize the position of nucleosomes
+
 seq_t = seq;
 seq_t(seq_t>0)=0;
 seq_t = -seq_t;
 
 shift_old = fix(dyad_f);
-shift_dyad = zeros(1,7);
-shift_all = zeros(1,1278);
+shift_dyad = zeros(1,bkg_nuc_number);
+shift_all = zeros(1,length(seq));
 cycle = 0;
 while ~isequal(fix(shift_old),fix(shift_dyad)) && cycle <=c_limit
     cycle = cycle + 1;
-    shift_all = zeros(1,1278);
-    bound = zeros(7,2);
+    shift_all = zeros(1,length(seq));
+    bound = zeros(bkg_nuc_number,2);
     if sum(shift_dyad)~=0
         shift_old = fix(shift_dyad);
     end
-    shift_dyad = zeros(1,7);
-    for x = 1:7
+    shift_dyad = zeros(1,bkg_nuc_number);
+    for x = 1:bkg_nuc_number
         if shift_old(1,x)~=0
             dyad_i = shift_old(1,x);%set the initial dyad position
             %nuc_pass = find(score_all_pos > 0.5);
@@ -44,10 +45,10 @@ while ~isequal(fix(shift_old),fix(shift_dyad)) && cycle <=c_limit
             for d = 1:window%move nucleosome to downstream
                 dyad_down = dyad_i+d;
                 if abs(dyad_down-mot_up) > bd || abs(fix(dyad_f(1,x))-mot_up) < bd %|| ind==144 || ind==145%if a nucleosome is not on motifs at the beginning, do not move it to the top of motifs, unless the sequence is a background sequence(144, 145)
-                    if dyad_down+2*bd>=1278%if the nucleosome is out of downstream boundary
+                    if dyad_down+2*bd>=length(seq)%if the nucleosome is out of downstream boundary
                         break
                     end
-                    if x~=7 && shift_old(1,x+1)~=0 && (shift_old(1,x+1)-dyad_down) < 2*bd + linker
+                    if x~=bkg_nuc_number && shift_old(1,x+1)~=0 && (shift_old(1,x+1)-dyad_down) < 2*bd + linker
                         break
                     end
                     down_score = score_all_pos(1,dyad_down);
@@ -64,17 +65,17 @@ while ~isequal(fix(shift_old),fix(shift_dyad)) && cycle <=c_limit
                 if shift_old(x+1)~=0
                     bound(x,2)= min(bound_down,(shift_old(x+1)-89));% After move this nucleosome, the distance between it and other nucleosomes needs to be longer than 14bp
                 else
-                    bound(x,2)= min(bound_down,1200);
+                    bound(x,2)= min(bound_down,length(seq)-78);
                 end
-            elseif x==7
+            elseif x==bkg_nuc_number
                 bound(x,1)= max(bound_up,shift_old(x-1)+89);
-                bound(x,2)= min(bound_down,1278);
+                bound(x,2)= min(bound_down,length(seq));
             else
                 bound(x,1)= max(bound_up,shift_old(x-1)+89);
                 if shift_old(1,x+1)~=0
                     bound(x,2)= min(bound_down,(shift_old(x+1)-89));
                 else
-                    bound(x,2)= min([bound_down,1278]);
+                    bound(x,2)= min([bound_down,length(seq)]);
                 end
             end
             if bound(x,2)-bound(x,1)>2*bd
@@ -130,7 +131,7 @@ while ~isequal(fix(shift_old),fix(shift_dyad)) && cycle <=c_limit
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
                 shift_dyad(1,x) = shift_old(1,x);
                 bound(x,1) = max(shift_dyad(1,x)-bd,1);
-                bound(x,2) = min(shift_dyad(1,x)+bd,1278);
+                bound(x,2) = min(shift_dyad(1,x)+bd,length(seq));
                 shift_all(1,bound(x,1):bound(x,2)) = (shift_all(1,bound(x,1):bound(x,2))+1).*score;
             end
             

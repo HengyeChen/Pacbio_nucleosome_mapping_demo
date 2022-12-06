@@ -1,34 +1,23 @@
-function align_met_all_v2(name,r_index)
-
-%list = [{'17R'};{'17D'};{'ID'}; {'IR'};{'ND'};{'NR'};{'TD'};{'TR'}];% set the name of samples
-
-mkdir('aligned');% make the main folder for all samples
-
-l = 1;
-mkdir('aligned/',num2str(l))
-%name = list{l,1};% select the file of one sample
+function alignment = align_met_all_v2(seqs_c,refs,motifs,variable_region,output)
+%%This function align reads to the reference sequence
+%seqs_c is the output of rev2fw_header_v2.m. It should contains raw reads and reverse complimentary reads
+%refs is the reference file which is a txt file.
+%motifs is the motif information file which is a mat file containing the position, sequence, and name of each TF motif
+%variable_region is the position of the variable region in the reference sequence
+%output is the output file
 tic;
-fileID = fopen('ref/refs_Y.txt');%open the reference file(orignial Cs are converted to Ys)
-refs = textscan(fileID,'%s');%read reference sequences
-refs = refs{1,1};%convert refs from a cell format to a char array
-fclose(fileID);
-
-data = load(['seqs/', name,'.mat']);%load the unmatched reads from file
-seqs_headers = data.data;
-seqs = seqs_headers(:,1);
-headers = seqs_headers(:,2);
-alignment = struct('reads', cell(1,169));%make a 1X169 structure named alignment to store the rematched reads
-mot_pos = load('ref/motif_pos_v2.mat');% read positions and sequences of motifs
-
+seqs = seqs_c(:,1);
+headers = seqs_c(:,2);
+mot_pos = load(motifs);% read positions and sequences of motifs
+references = readcell(refs);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for k = 1:length(r_index)
-    r = r_index(k);
-    ref = refs{r,1};%read a reference sequence
-    ref_roi = ref(437:519);% the variable region (the region that contains motifs) in the reference sequence
+for r = 1
+    ref = references{r,1};%read a reference sequence
+    ref_roi = ref(variable_region);% the variable region (the region that contains motifs) in the reference sequence
     count = length(seqs);
     seqs = seqs(~cellfun('isempty',seqs));
     mheader = cell(count,1);
-    aligned = char(zeros(count,1278));
+    aligned = char(zeros(count,length(ref)));
     ac = 0;
     for i = 1:count% align each seq to the selected ref
         header = headers{i,1};
@@ -69,9 +58,9 @@ for k = 1:length(r_index)
                     'ScoringMatrix','NUC44');
                 
                 sim_all = sum(align2(2,:)== '|' | align2(2,:)==':');%count how many nt are matched in the whole seq
-                sim_v = sum(align2(2,430:540)== '|' | align2(2,430:540)==':');%count how many nt are matched in the variable region
+                sim_v = sum(align2(2,variable_region)== '|' | align2(2,variable_region)==':');%count how many nt are matched in the variable region
                 %if the overall similarity is above 90% and similarity at variable region is higher than 99%, add this sequence to 'aligned'
-                if sim_all > 0.90*length(ref) && sim_v > 0.99*(540-430)
+                if sim_all > 0.90*length(ref) && sim_v > 0.99*length(variable_region)
                     real = motif_align(aseq,mot_pos,r);
                     if real == 1
                         ac = ac+1;
@@ -85,12 +74,12 @@ for k = 1:length(r_index)
         end
     end
     if ac~=0
-        alignment(1,r).reads = aligned(1:ac,:); %input the aligned seq to the struct, r is the index of the ref
-        alignment(1,r).header = mheader(~cellfun('isempty',mheader));%remove empty variables in the cell array mheader
-        save_data(['aligned/',num2str(l),'/aligned_', name,'_',num2str(r), '.mat'], aligned)% save this set of remathced seq
+        alignment.reads = aligned(1:ac,:); %input the aligned seq to the struct, r is the index of the ref
+        alignment.header = mheader(~cellfun('isempty',mheader));%remove empty variables in the cell array mheader
     end
     disp(r);
 end
-save(['aligned/aligned_', name, '.mat'], 'alignment');%save all rematch seqs
+save(output, 'alignment');%save all rematch seqs
+disp('alignment completed');
 toc;
 end

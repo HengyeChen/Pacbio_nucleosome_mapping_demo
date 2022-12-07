@@ -48,25 +48,26 @@ predicted_bkg = nuc_predict_v2(matrix_bkg,matrix_bkg,mot_ndf,bkg_pseudo_pos,bord
 predicted_ndf = nuc_predict_v2(matrix_bkg,matrix_ndf,mot_ndf,bkg_pseudo_pos,border,linker,is_bkg_no,is_remove_nuc,c_limit,roi,pred_matrix_ndf,pred_pileup_ndf);%predict nucleosomes on ndf reads
 
 %% calculate NDR length and proportion
-bkg_lp = 'nuc_prediction\pred_bkg_lp.mat';
-ndf_lp = 'nuc_prediction\pred_ndf_lp.mat';
+bkg_lp = 'nuc_prediction\pred_bkg_lp.mat';%output file
+ndf_lp = 'nuc_prediction\pred_ndf_lp.mat';%output file
 
-NDR_num_len_v2(predicted_bkg,mot_bkg,is_bkg_yes,bkg_pseudo_pos,border,bkg_lp);
-NDR_num_len_v2(predicted_ndf,mot_ndf,is_bkg_no,bkg_pseudo_pos,border,ndf_lp);
+NDR_num_len_v2(predicted_bkg,mot_bkg,is_bkg_yes,bkg_pseudo_pos,border,bkg_lp);%calculate length and probability of NDRs on bkg reads
+NDR_num_len_v2(predicted_ndf,mot_ndf,is_bkg_no,bkg_pseudo_pos,border,ndf_lp);%calculate length and probability of NDRs on NDF reads
 
 %% make heatmaps
-mkdir('nuc_prediction\heatmaps_pred');
-mkdir('nuc_prediction\heatmaps_met');
-hm_pred_bkg =  'nuc_prediction/heatmaps_pred/heatmap_pred_bkg';
-hm_met_bkg = 'nuc_prediction/heatmaps_met/heatmap_met_bkg';
-hm_pred_ndf =  'nuc_prediction/heatmaps_pred/heatmap_pred_ndf';
-hm_met_ndf = 'nuc_prediction/heatmaps_met/heatmap_met_ndf';
-is_sort_yes = 1;
-simple_sort_yes = 1;
-simple_sort_region = 150;
-plot_region = 21:1174;
-Pacbio_clustergram_v2(predicted_bkg,ref_bkg,mot_bkg,is_bkg_yes,bkg_pseudo_pos,plot_region,is_sort_yes,simple_sort_yes,simple_sort_region,hm_pred_bkg,hm_met_bkg);
-Pacbio_clustergram_v2(predicted_ndf,ref_ndf,mot_ndf,is_bkg_no,bkg_pseudo_pos,plot_region,is_sort_yes,simple_sort_yes,simple_sort_region,hm_pred_ndf,hm_met_ndf);
+mkdir('nuc_prediction\heatmaps_pred');%make a directory named heatmaps_pred
+mkdir('nuc_prediction\heatmaps_met');%make a directory named heatmaps_met
+hm_pred_bkg =  'nuc_prediction/heatmaps_pred/heatmap_pred_bkg';%output methylation map
+hm_met_bkg = 'nuc_prediction/heatmaps_met/heatmap_met_bkg';%output methylation map
+hm_pred_ndf =  'nuc_prediction/heatmaps_pred/heatmap_pred_ndf';%output methylation map
+hm_met_ndf = 'nuc_prediction/heatmaps_met/heatmap_met_ndf';%output methylation map
+is_sort_yes = 1;%sort reads when make heatmaps
+simple_sort_yes = 1;%simply sort reads based on the methylation near motifs
+simple_sort_region = 150;%simply sort reads based on the ±150bp near motifs
+plot_region = 21:1174;%plot 21 to 1174 columns in the matrix
+
+Pacbio_clustergram_v2(predicted_bkg,ref_bkg,mot_bkg,is_bkg_yes,bkg_pseudo_pos,plot_region,is_sort_yes,simple_sort_yes,simple_sort_region,hm_pred_bkg,hm_met_bkg);%make heatmaps
+Pacbio_clustergram_v2(predicted_ndf,ref_ndf,mot_ndf,is_bkg_no,bkg_pseudo_pos,plot_region,is_sort_yes,simple_sort_yes,simple_sort_region,hm_pred_ndf,hm_met_ndf);%make heatmaps
 
 toc
 end

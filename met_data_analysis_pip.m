@@ -16,10 +16,10 @@ mot_ndf = 'ref\motif_ndf.mat';%the position of the motif, the sequence of the mo
 aligned_bkg_file = 'aligned\aligned_example_bkg.mat';%output file
 aligned_ndf_file = 'aligned\aligned_example_ndf.mat';%output file
 variable_region = 437:519;%the location of the variable region in the reference sequence
+align_accuracy = 0.98;%The minimal alignment accuracy is 98%
 
-
-aligned_bkg = align_met_all_v2(seqs_c,ref_bkg,mot_bkg,variable_region,aligned_bkg_file);%align reads to the background sequence
-aligned_ndf = align_met_all_v2(seqs_c,ref_ndf,mot_ndf,variable_region,aligned_ndf_file);%align reads to the NDF sequence
+aligned_bkg = align_met_all_v2(seqs_c,ref_bkg,mot_bkg,variable_region,align_accuracy,aligned_bkg_file);%align reads to the background sequence
+aligned_ndf = align_met_all_v2(seqs_c,ref_ndf,mot_ndf,variable_region,align_accuracy,aligned_ndf_file);%align reads to the NDF sequence
 
 %%
 mkdir('matrix');%make a directory named matrix

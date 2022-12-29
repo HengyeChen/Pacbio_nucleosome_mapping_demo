@@ -1,4 +1,4 @@
-function alignment = align_met_all_v2(seqs_c,refs,motifs,variable_region,align_accuracy,output)
+function alignment = align_met_all_v2(seqs_all,is_bkg,refs,motifs,variable_region,align_accuracy,output)
 %%This function align reads to the reference sequence
 %seqs_c is the output of rev2fw_header_v2.m. It should contains raw reads and reverse complimentary reads
 %refs is the reference file which is a txt file.
@@ -6,22 +6,26 @@ function alignment = align_met_all_v2(seqs_c,refs,motifs,variable_region,align_a
 %variable_region is the position of the variable region in the reference sequence
 %output is the output file
 tic;
-seqs = seqs_c(:,1);
-headers = seqs_c(:,2);
-mot_pos = load(motifs);% read positions and sequences of motifs
+seqs = seqs_all(:,1);
+headers = seqs_all(:,2);
+if is_bkg == 1
+    mot_pos = load(motifs).mot.bkg;% read positions and sequences of motifs
+else
+    mot_pos = load(motifs).mot.tf;% read positions and sequences of motifs
+end
 references = readcell(refs);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-for r = 1
+for r = 1:length(references)
     ref = references{r,1};%read a reference sequence
     ref_roi = ref(variable_region);% the variable region (the region that contains motifs) in the reference sequence
-    count = length(seqs);
     seqs = seqs(~cellfun('isempty',seqs));
+    count = length(seqs);
     mheader = cell(count,1);
     aligned = char(zeros(count,length(ref)));
     ac = 0;
     for i = 1:count% align each seq to the selected ref
         header = headers{i,1};
-        try
+        %try
             %% align each read to the variable region in the reference
             [~, roi_local] = swalign(ref_roi,seqs{i,1},...%locally align unmatched seqs to the ref seq using Smith-Waterman algorithm
                 'Alphabet', 'NT',...%set seq type as nucleotide('NT')
@@ -70,12 +74,12 @@ for r = 1
                     end
                 end
             end
-        catch
-        end
+        %catch
+        %end
     end
     if ac~=0
-        alignment.reads = aligned(1:ac,:); %input the aligned seq to the struct, r is the index of the ref
-        alignment.header = mheader(~cellfun('isempty',mheader));%remove empty variables in the cell array mheader
+        alignment(r).reads = aligned(1:ac,:); %input the aligned seq to the struct, r is the index of the ref
+        alignment(r).header = mheader(~cellfun('isempty',mheader));%remove empty variables in the cell array mheader
     end
     disp(r);
 end

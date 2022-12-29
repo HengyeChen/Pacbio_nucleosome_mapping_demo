@@ -1,7 +1,7 @@
-function infom = nuc_predict_v2(matrix_bkg,matrix_ndf,motif_ndf,bkg_pseudo_pos,border,linker,is_bkg,is_remove_nuc,c_limit,roi,pred_matrix,pred_pileup)%This version predict nuc-6 at the canonical place, when no methylated GC at the upstream of the sequence
+function infom = nuc_predict_v2(matrix_bkg,matrix_tf,motif_info,bkg_pseudo_pos,border,linker,is_bkg,is_remove_nuc,c_limit,roi,pred_matrix,pred_pileup)%This version predict nuc-6 at the canonical place, when no methylated GC at the upstream of the sequence
 %% this function predict nucleosomes from the methylation matrix
-%matrix_bkg and matrix_ndf are outputs from pbmatrix_v2.m. They contains methylation matrices for background and ndf sequences
-%motif_ndf is the motif information file which is a mat file containing the position, sequence, and name of each TF motif
+%matrix_bkg and matrix_tf are outputs from pbmatrix_v2.m. They contains methylation matrices for background and TF sequences
+%motif_tf is the motif information file which is a mat file containing the position, sequence, and name of each TF motif
 %bkg_pseudo_pos is the pseudo position of the background sequence
 %border is the nucleosome protection length on one side of the nucleosome dyad
 %linker is the length of linker
@@ -13,7 +13,7 @@ function infom = nuc_predict_v2(matrix_bkg,matrix_ndf,motif_ndf,bkg_pseudo_pos,b
 %pred_pileup is the output file containing the bulk methylation level and nucleosome occupancy
 
 tic;
-motn = load(motif_ndf);%read motif positions
+mot_tf = load(motif_info).mot.tf;%read motif positions
 %%%%%%%%%%%%%%%%%% generate a cumulative distribution curve, and use it as the scoring matrix for a mononucleosome
 a = -20; b = border;
 x = a:1:b;%set the range of the cumulative distribution curve
@@ -34,15 +34,14 @@ if is_remove_nuc == 1
     xxx = sum(mm,2)/length(find(matrix_bkg.C_T_pos>=roi(1,1) & matrix_bkg.C_T_pos<=roi(end,end)));
     ds = fitdist(xxx,'Normal');
     thu = ds.mu + 1.282*ds.sigma;
-end
-
+end 
 %% predict nucleosome in each sequence
-for i = 1
-    mpos = motn.mot.pos;%read the position file
+for i = 1:length(matrix_tf)
+    mpos = mot_tf(i).pos;%read the position file
 if is_bkg == 1
     mpos = bkg_pseudo_pos;
 end
-    matrix = matrix_ndf.C_T_sum_trim;%read the trimmed sequence matrix
+    matrix = matrix_tf(i).C_T_sum_trim;%read the trimmed sequence matrix
     [len,~] = size(matrix);%count the number of reads in the matrix
     if len == 0
         continue
@@ -56,7 +55,7 @@ end
     mot_down = max(max(mpos))+10;%set the boundary of the motifs, downstream + 10bp
     mot_up = min(min(mpos))-10;%set the boundary of the motifs, upstream - 10bp
     pileup_m1 = zeros(len,lenmat);
-    gc_pos = matrix_ndf.C_T_pos;
+    gc_pos = matrix_tf(i).C_T_pos;
     pileup_met = zeros(3,length(gc_pos));
     seqt = matrix;% create a new array which is same as seq
     seqt(seqt<0) = 0;

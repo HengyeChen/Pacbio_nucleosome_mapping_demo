@@ -8,8 +8,8 @@ tic
 references = readcell(refs);%open the reference file for bkg sequences(orignial Cs are converted to Ys)
 C_T_all_sum = struct('C_T_sum_trim',[],'C_T_pos',[],'value_sum_trim',[]);
 %%
-for k = 1
-    seqs = aligned.reads;
+for k = 1:length(references)
+    seqs = aligned(k).reads;
     ref = references{k};
     position = strfind(ref,'GY');
     [~, num_position] = size(position);

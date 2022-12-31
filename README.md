@@ -20,7 +20,7 @@ Run the command below to generate reverse complimentary reads of the raw reads
 > cd yourFolder;%open the folder containing all files. Replace "yourFolder" with your directory path.\
 > mkdir('seqs');%make a folder named seqs.\
 > ccs_file = 'consensus_sequence\example.fastq';%sequencing read file\
-> seqs_file = 'seqs\example.mat';%output file which contains both forward and reverse complimentary reads.\
+> seqs_file = 'seqs\seqs_all_record.mat';%output file which contains both forward and reverse complimentary reads.\
 > seqs_all = rev2fw_header_v2(ccs_file,seqs_file);%generate reverse complimentary reads
 
 Forward and reverse reads are saved in a MATLAB structure. 
@@ -109,7 +109,7 @@ Pacbio_clustergram_v2.m generate heatmaps using the matrixes made by pbmatrix_v2
 ## Output files
 All example output files can be found in folder "[example_output](https://github.com/HengyeChen/Pacbio_nucleosome_mapping_demo/tree/main/example_output)". You can compare the output files you generated with the example files to make sure the scripts work properly.
 ### forward and reverse complimentary reads
-Forward and reverse complimentary reads are saved in "[example.mat](https://github.com/HengyeChen/Pacbio_nucleosome_mapping_demo/blob/main/example_output/seqs/example.mat)".
+Forward and reverse complimentary reads are saved in "[seqs_all_record.mat](https://github.com/HengyeChen/Pacbio_nucleosome_mapping_demo/blob/main/example_output/seqs/seqs_all_record.mat)".
 
 ### aligned reads
 Aligned reads are saved in folder "[aligned](https://github.com/HengyeChen/Pacbio_nucleosome_mapping_demo/tree/main/example_output/aligned)".

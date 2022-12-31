@@ -6,7 +6,7 @@ tic
 %% generate reverse complimentary reads of consensus reads
 mkdir('seqs');%make a folder named seqs.
 ccs_file = 'consensus_sequence\example.fastq';%sequencing read file
-seqs_file = 'seqs\example.mat';%output file
+seqs_file = 'seqs\seqs_all_record.mat';%output file
 seqs_all = rev2fw_header_v2(ccs_file,seqs_file);%generate reverse complimentary reads
 
 %% align reads to references

@@ -16,7 +16,7 @@ All MATLAB scripts can be found in the main folder(https://github.com/HengyeChen
 ## Nucleosome prediction
 ### Generate reverse complimentary reads
 Run the command below to generate reverse complimentary reads of the raw reads
-> cd yourFolder;%open the folder containing all files. Replace "yourFolder" with your directory path.
+> cd yourFolder;
 > mkdir('seqs');%make a folder named seqs.
 > ccs_file = 'consensus_sequence\example.fastq';%sequencing read file
 > seqs_file = 'seqs\example.mat';%output file which contains both forward and reverse complimentary reads.

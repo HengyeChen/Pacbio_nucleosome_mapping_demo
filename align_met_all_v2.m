@@ -40,7 +40,7 @@ for r = 1:length(references)
             % If the read can be aligned to the variable region, then align
             % it to the full-length reference sequence. This step can
             % accelerate the alignment
-            if sum(roi_local(2,:)== '|' | roi_local(2,:)==':')>length(variable_region)*(variable_region_accuracy-0.01)
+            if sum(roi_local(2,:)== '|' | roi_local(2,:)==':')>length(variable_region)*(variable_region_accuracy-0.02)
                 %% align each read to the reference sequence
                 [~, local_align] = swalign(ref,seqs{i,1},...%locally align unmatched seqs to the ref seq using Smith-Waterman algorithm
                     'Alphabet', 'NT',...%set seq type as nucleotide('NT')

@@ -1,4 +1,11 @@
-function alignment = align_met_all_v2(seqs_all,is_bkg,refs,motifs,variable_region,align_accuracy,output)
+function [aligned_bkg, aligned_tf]= align_met_all_v2(seqs_all,ref_bkg,ref_tf,mot_info,variable_region,align_accuracy,aligned_bkg_file,aligned_tf_file)
+    aligned_bkg = align_met_all(seqs_all,1,ref_bkg,mot_info,variable_region,align_accuracy,aligned_bkg_file);
+    aligned_tf = align_met_all(seqs_all,0,ref_tf,mot_info,variable_region,align_accuracy,aligned_tf_file);
+end
+
+
+
+function alignment = align_met_all(seqs_all,is_bkg,refs,motifs,variable_region,align_accuracy,output)
 %%This function align reads to the reference sequence
 %seqs_c is the output of rev2fw_header_v2.m. It should contains raw reads and reverse complimentary reads
 %refs is the reference file which is a txt file.

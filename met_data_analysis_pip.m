@@ -18,8 +18,9 @@ aligned_bkg_file = 'aligned\aligned_example_bkg.mat';%output file
 aligned_tf_file = 'aligned\aligned_example_tf.mat';%output file
 variable_region = 437:519;%the location of the variable region in the reference sequence
 align_accuracy = 0.98;%The minimal alignment accuracy is 98%
+variable_region_accuracy = 0.99;%The minimal alignment accuracy for the variable region is 99%
 
-[aligned_bkg, aligned_tf] = align_met_all_v2(seqs_all,ref_bkg,ref_tf,mot_info,variable_region,align_accuracy,aligned_bkg_file,aligned_tf_file);%align reads to the reference sequences
+[aligned_bkg, aligned_tf] = align_met_all_v2(seqs_all,ref_bkg,ref_tf,mot_info,variable_region,variable_region_accuracy,align_accuracy,aligned_bkg_file,aligned_tf_file);%align reads to the reference sequences
 
 %% convert aligned reads to numeric matrices
 mkdir('matrix');%make a directory named matrix

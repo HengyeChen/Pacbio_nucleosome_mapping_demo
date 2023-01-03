@@ -1,11 +1,11 @@
-function [aligned_bkg, aligned_tf]= align_met_all_v2(seqs_all,ref_bkg,ref_tf,mot_info,variable_region,align_accuracy,aligned_bkg_file,aligned_tf_file)
-    aligned_bkg = align_met_all(seqs_all,1,ref_bkg,mot_info,variable_region,align_accuracy,aligned_bkg_file);
-    aligned_tf = align_met_all(seqs_all,0,ref_tf,mot_info,variable_region,align_accuracy,aligned_tf_file);
+function [aligned_bkg, aligned_tf]= align_met_all_v2(seqs_all,ref_bkg,ref_tf,mot_info,variable_region,variable_region_accuracy,align_accuracy,aligned_bkg_file,aligned_tf_file)
+    aligned_bkg = align_met_all(seqs_all,1,ref_bkg,mot_info,variable_region,variable_region_accuracy,align_accuracy,aligned_bkg_file);
+    aligned_tf = align_met_all(seqs_all,0,ref_tf,mot_info,variable_region,variable_region_accuracy,align_accuracy,aligned_tf_file);
 end
 
 
 
-function alignment = align_met_all(seqs_all,is_bkg,refs,motifs,variable_region,align_accuracy,output)
+function alignment = align_met_all(seqs_all,is_bkg,refs,motifs,variable_region,variable_region_accuracy,align_accuracy,output)
 %%This function align reads to the reference sequence
 %seqs_c is the output of rev2fw_header_v2.m. It should contains raw reads and reverse complimentary reads
 %refs is the reference file which is a txt file.
@@ -40,7 +40,7 @@ for r = 1:length(references)
             % If the read can be aligned to the variable region, then align
             % it to the full-length reference sequence. This step can
             % accelerate the alignment
-            if sum(roi_local(2,:)== '|' | roi_local(2,:)==':')>80
+            if sum(roi_local(2,:)== '|' | roi_local(2,:)==':')>length(variable_region)*(variable_region_accuracy-0.01)
                 %% align each read to the reference sequence
                 [~, local_align] = swalign(ref,seqs{i,1},...%locally align unmatched seqs to the ref seq using Smith-Waterman algorithm
                     'Alphabet', 'NT',...%set seq type as nucleotide('NT')
@@ -71,7 +71,7 @@ for r = 1:length(references)
                 sim_all = sum(align2(2,:)== '|' | align2(2,:)==':');%count how many nt are matched in the whole seq
                 sim_v = sum(align2(2,variable_region)== '|' | align2(2,variable_region)==':');%count how many nt are matched in the variable region
                 %if the overall similarity is above 90% and similarity at variable region is higher than 99%, add this sequence to 'aligned'
-                if sim_all > align_accuracy*length(ref) && sim_v > 0.99*length(variable_region)
+                if sim_all > align_accuracy*length(ref) && sim_v > variable_region_accuracy*length(variable_region)
                     real = motif_align(aseq,mot_pos,r);
                     if real == 1
                         ac = ac+1;

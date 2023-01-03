@@ -1,4 +1,10 @@
-function Pacbio_clustergram_v2(predicted,refs,mot,is_bkg,bkg_pseudo_pos,plot_region,is_sort,sort_region,hm_pred,hm_met)
+function Pacbio_clustergram_v2(predicted_bkg,predicted_tf,ref_bkg,ref_tf,mot_info,bkg_pseudo_pos,plot_region,is_sort,sort_region,heatmap_pred_bkg,heatmap_met_bkg,heatmap_pred_tf,heatmap_met_tf)
+
+Pacbio_clustergram(predicted_bkg,ref_bkg,mot_info,1,bkg_pseudo_pos,plot_region,is_sort,sort_region,heatmap_pred_bkg,heatmap_met_bkg);%make heatmaps for the background sequence
+Pacbio_clustergram(predicted_tf,ref_tf,mot_info,0,bkg_pseudo_pos,plot_region,is_sort,sort_region,heatmap_pred_tf,heatmap_met_tf);%make heatmaps for sequences with TF motifs
+end
+
+function Pacbio_clustergram(predicted,refs,mot,is_bkg,bkg_pseudo_pos,plot_region,is_sort,sort_region,hm_pred,hm_met)
 %% This function plot heatmaps using methylation and nucleosome prediction matrices
 %predicted is the output of nuc_predict_v2.m. It contains the nucleosome prediction matrix.
 %refs is the reference file which is a txt file.

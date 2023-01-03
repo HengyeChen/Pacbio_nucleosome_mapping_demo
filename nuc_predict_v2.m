@@ -1,4 +1,9 @@
-function infom = nuc_predict_v2(matrix_bkg,matrix_tf,motif_info,bkg_pseudo_pos,border,linker,is_bkg,is_remove_nuc,c_limit,roi,pred_matrix,pred_pileup)%This version predict nuc-6 at the canonical place, when no methylated GC at the upstream of the sequence
+function [predicted_bkg,predicted_tf] = nuc_predict_v2(matrix_bkg,matrix_tf,mot_info,bkg_pseudo_pos,border,linker,is_remove_nuc,c_limit,roi,pred_matrix_bkg,pred_pileup_bkg,pred_matrix_tf,pred_pileup_tf)
+predicted_bkg = nuc_predict(matrix_bkg,matrix_bkg,mot_info,bkg_pseudo_pos,border,linker,1,is_remove_nuc,c_limit,roi,pred_matrix_bkg,pred_pileup_bkg);%predict nucleosomes on bkg reads
+predicted_tf = nuc_predict(matrix_bkg,matrix_tf,mot_info,bkg_pseudo_pos,border,linker,0,is_remove_nuc,c_limit,roi,pred_matrix_tf,pred_pileup_tf);%predict nucleosomes on TF reads
+end
+
+function infom = nuc_predict(matrix_bkg,matrix_tf,motif_info,bkg_pseudo_pos,border,linker,is_bkg,is_remove_nuc,c_limit,roi,pred_matrix,pred_pileup)%This version predict nuc-6 at the canonical place, when no methylated GC at the upstream of the sequence
 %% this function predict nucleosomes from the methylation matrix
 %matrix_bkg and matrix_tf are outputs from pbmatrix_v2.m. They contains methylation matrices for background and TF sequences
 %motif_tf is the motif information file which is a mat file containing the position, sequence, and name of each TF motif
@@ -27,20 +32,20 @@ bkg_nuc_number = floor(lenmat/(2*b+1+linker));%The maximum number of nucleosomes
 %% nucleosome prediction
 dbstop if error
 %% set the methylation threshold with the methylation level in background sequences
-if is_remove_nuc == 1 
+if is_remove_nuc == 1
     met_all = matrix_bkg.C_T_sum_trim;
     mm = met_all(:,roi);
     mm(mm==-1)=0;
     xxx = sum(mm,2)/length(find(matrix_bkg.C_T_pos>=roi(1,1) & matrix_bkg.C_T_pos<=roi(end,end)));
     ds = fitdist(xxx,'Normal');
     thu = ds.mu + 1.282*ds.sigma;
-end 
+end
 %% predict nucleosome in each sequence
 for i = 1:length(matrix_tf)
     mpos = mot_tf(i).pos;%read the position file
-if is_bkg == 1
-    mpos = bkg_pseudo_pos;
-end
+    if is_bkg == 1
+        mpos = bkg_pseudo_pos;
+    end
     matrix = matrix_tf(i).C_T_sum_trim;%read the trimmed sequence matrix
     [len,~] = size(matrix);%count the number of reads in the matrix
     if len == 0
@@ -63,7 +68,7 @@ end
         seq = matrix(m,:);%read a single sequence from the matrix
         dyad_f = zeros(1,bkg_nuc_number);%reset dyad positions of all nucleosomes
         score_sum = zeros(1,bkg_nuc_number)-2;% set the default score of each nucleosome as -2
-        
+
         for a = (1+border):(lenmat-border)
             seqs= seq;% create a new array which is same as seq
             if (sum(seqs(1,roi)==1)/sum(seqs(1,roi)~=0))>thu %&& i~=144 && i~=145
@@ -112,7 +117,7 @@ end
                 pfactor = 1;%set the penalty factor
                 penalty = pen_score(distance,pfactor,linker);% calculate penalty score using the function pen_score
                 score_sum_new = sum(score_nuc) - penalty;% set the final score as the score - penalty score
-                
+
                 % if the nucleosome positioning score at the new
                 % location is high than at the previous position, replace the old one with the new one.
                 if score_sum_new >= -0.5 % set the minimium score for the existence of a nucleosome

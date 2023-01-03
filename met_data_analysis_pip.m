@@ -19,10 +19,7 @@ aligned_tf_file = 'aligned\aligned_example_tf.mat';%output file
 variable_region = 437:519;%the location of the variable region in the reference sequence
 align_accuracy = 0.98;%The minimal alignment accuracy is 98%
 
-is_bkg = 1;% align reads to the bkg sequence
-aligned_bkg = align_met_all_v2(seqs_all,is_bkg,ref_bkg,mot_info,variable_region,align_accuracy,aligned_bkg_file);%align reads to the background sequence
-is_bkg = 0;% align reads to sequences containing TF motifs
-aligned_tf = align_met_all_v2(seqs_all,is_bkg,ref_tf,mot_info,variable_region,align_accuracy,aligned_tf_file);%align reads to the TF sequence
+[aligned_bkg, aligned_tf] = align_met_all_v2(seqs_all,ref_bkg,ref_tf,mot_info,variable_region,align_accuracy,aligned_bkg_file,aligned_tf_file);%align reads to the reference sequences
 
 %% convert aligned reads to numeric matrices
 mkdir('matrix');%make a directory named matrix
@@ -44,19 +41,13 @@ pred_pileup_bkg = 'nuc_prediction/nuc_pred_pileup_bkg.mat';% output averaged occ
 pred_matrix_tf = 'nuc_prediction/nuc_pred_example_tf.mat';% output TF matrices
 pred_pileup_tf = 'nuc_prediction/nuc_pred_pileup_tf.mat';% output averaged occupancies on the TF sequence
 
-is_bkg = 1;%predict nucleosome on the bkg sequence
-predicted_bkg = nuc_predict_v2(matrix_bkg,matrix_bkg,mot_info,bkg_pseudo_pos,border,linker,is_bkg,is_remove_nuc,c_limit,roi,pred_matrix_bkg,pred_pileup_bkg);%predict nucleosomes on bkg reads
-is_bkg = 0;%predict nucleosome on a TF sequence
-predicted_tf = nuc_predict_v2(matrix_bkg,matrix_tf,mot_info,bkg_pseudo_pos,border,linker,is_bkg,is_remove_nuc,c_limit,roi,pred_matrix_tf,pred_pileup_tf);%predict nucleosomes on TF reads
+[predicted_bkg,predicted_tf] = nuc_predict_v2(matrix_bkg,matrix_tf,mot_info,bkg_pseudo_pos,border,linker,is_remove_nuc,c_limit,roi,pred_matrix_bkg,pred_pileup_bkg,pred_matrix_tf,pred_pileup_tf);%predict nucleosomes on reads
 
 %% calculate NDR length and proportion
 bkg_lp = 'nuc_prediction\pred_bkg_lp.mat';%output file
 tf_lp = 'nuc_prediction\pred_tf_lp.mat';%output file
 
-is_bkg = 1;%predict nucleosome on the bkg sequence
-NDR_num_len_v2(predicted_bkg,mot_info,is_bkg,bkg_pseudo_pos,border,bkg_lp);%calculate length and probability of NDRs on bkg reads
-is_bkg = 0;%predict nucleosome on a TF sequence
-NDR_num_len_v2(predicted_tf,mot_info,is_bkg,bkg_pseudo_pos,border,tf_lp);%calculate length and probability of NDRs on TF reads
+NDR_num_len_v2(predicted_bkg,predicted_tf,mot_info,bkg_pseudo_pos,border,bkg_lp,tf_lp);%calculate length and probability of NDRs on reads
 
 %% make heatmaps
 mkdir('nuc_prediction\heatmaps_pred');%make a directory named heatmaps_pred
@@ -69,10 +60,6 @@ is_sort = 1;%sort reads when make heatmaps
 sort_region = 150;%sort reads based on the ±150bp near motifs
 plot_region = 21:1174;%plot 21 to 1174 columns in the matrix
 
-is_bkg = 1;%make the heatmap for the bkg sequence
-Pacbio_clustergram_v2(predicted_bkg,ref_bkg,mot_info,is_bkg,bkg_pseudo_pos,plot_region,is_sort,sort_region,heatmap_pred_bkg,heatmap_met_bkg);%make heatmaps
-is_bkg = 0;%make heatmaps for TF sequences
-Pacbio_clustergram_v2(predicted_tf,ref_tf,mot_info,is_bkg,bkg_pseudo_pos,plot_region,is_sort,sort_region,heatmap_pred_tf,heatmap_met_tf);%make heatmaps
-
+Pacbio_clustergram_v2(predicted_bkg,predicted_tf,ref_bkg,ref_tf,mot_info,bkg_pseudo_pos,plot_region,is_sort,sort_region,heatmap_pred_bkg,heatmap_met_bkg,heatmap_pred_tf,heatmap_met_tf);%make heatmaps
 toc
 end

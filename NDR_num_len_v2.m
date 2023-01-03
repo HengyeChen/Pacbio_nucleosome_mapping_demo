@@ -1,4 +1,9 @@
-function all = NDR_num_len_v2(predicted,motif,is_bkg,bkg_pseudo_pos,border,length_proportion)
+function [ndr_bkg,ndr_tf] = NDR_num_len_v2(predicted_bkg,predicted_tf,mot_info,bkg_pseudo_pos,border,bkg_lp,tf_lp)
+ndr_bkg = NDR_num_len(predicted_bkg,mot_info,1,bkg_pseudo_pos,border,bkg_lp);%calculate length and probability of NDRs on bkg reads
+ndr_tf = NDR_num_len(predicted_tf,mot_info,0,bkg_pseudo_pos,border,tf_lp);%calculate length and probability of NDRs on TF reads
+end
+
+function all = NDR_num_len(predicted,motif,is_bkg,bkg_pseudo_pos,border,length_proportion)
 %% this function calculate the length and proportion of nucleosome-depleted regions.
 %predicted is the output of nuc_predict_v2.m. It contains the nucleosome prediction matrix.
 %motif is the motif information file which is a mat file containing the position, sequence, and name of each TF motif
@@ -80,14 +85,15 @@ for i = 1:length(predicted)
     %% save the data in the structure 'all'
     all.info(i).name = mname;
     all.info(i).num = len;
-    all.info(i).ndr_rate = sum(ndr(:,1))/len;
+    all.info(i).ndr_probability = sum(ndr(:,1))/len;
     ndrs = ndr(:,2);
     ndrs_only = sort(ndrs(ndrs~=0),'descend');% sort the NDR length
     mndrso = mean(ndrs_only((1+round(len/20)):end,1));%calculate average NDR length of reads containing NDRs(top %5 longest reads are removed because when NDRs are short, this small population of overmethylated reads will significantly affect the average length)
+    all.info(i).ndr_length = mndrso;% average NDR length of reads containing NDRs(top %5 reads are removed), this is the average NDR length used in paper
+    all.info(i).ndrs = ndrs;% NDR length of each read
     all.info(i).ndr_mean = sum(ndrs)/len;% average NDR length of all reads
     all.info(i).ndr_median = median(ndrs);% median NDR length of all reads
-    all.info(i).ndrs = ndrs;% NDR length of each read
-    all.info(i).ndr_only_mean = mndrso;% average NDR length of reads containing NDRs(top %5 reads are removed), this is the average NDR length used in paper
+
     %ndr_info(i,:) = [i len mndrso sum(ndr(:,1))/len];
     save_data(length_proportion,all);    
 end

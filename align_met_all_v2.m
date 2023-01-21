@@ -7,7 +7,7 @@ end
 
 function alignment = align_met_all(seqs_all,is_bkg,refs,motifs,variable_region,variable_region_accuracy,align_accuracy,output)
 %%This function align reads to the reference sequence
-%seqs_c is the output of rev2fw_header_v2.m. It should contains raw reads and reverse complimentary reads
+%seqs_c is the output of rev2fw_header_v2.m. It should contains raw reads and reverse complementary reads
 %refs is the reference file which is a txt file.
 %motifs is the motif information file which is a mat file containing the position, sequence, and name of each TF motif
 %variable_region is the position of the variable region in the reference sequence

@@ -3,11 +3,11 @@ tic
 %open the folder that contains files downloaded from github
 %cd yourFolder;
 
-%% generate reverse complimentary reads of consensus reads
+%% generate reverse complementary reads of consensus reads
 mkdir('seqs');%make a folder named seqs.
 ccs_file = 'consensus_sequence\example.fastq';%sequencing read file
 seqs_file = 'seqs\seqs_all_record.mat';%output file
-seqs_all = rev2fw_header_v2(ccs_file,seqs_file);%generate reverse complimentary reads
+seqs_all = rev2fw_header_v2(ccs_file,seqs_file);%generate reverse complementary reads
 
 %% align reads to references
 mkdir('aligned');% make a directory named aligned
